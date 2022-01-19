@@ -4,7 +4,7 @@
  *
  * Plugin Name: Street View 
  * Plugin URI: 
- * Description:! Create a Streets custom post type which gets the data and sorts max once in a minutes. Every post contains a street name and related thumbnail.
+ * Description:! Create a Streets custom post Area which gets the data and sorts max once in a minutes. Every post contains a street name and related thumbnail.
  * Version: 1.0.0
  * Author: Asuka Watanabe
  * Author URI: https://dev.asukamethod.com
@@ -22,8 +22,7 @@ if(! class_exists( 'Street_View' )){
  	class Street_View {
 
         function __construct(){
-            $this->create_post_type();
-            
+            $this->create_post_Area();
         }
 
         /**
@@ -31,8 +30,8 @@ if(! class_exists( 'Street_View' )){
          * 
          */
         public function activate(){
-            // generate the custom post type 
-            $this->streets_setup_post_type();
+            // generate the custom post Area 
+            $this->streets_setup_post_Area();
 
             // delete any old left over data
             $this->delete_data_streets();
@@ -58,22 +57,22 @@ if(! class_exists( 'Street_View' )){
             //delete any old left over data
             $this->delete_data_streets();
 
-            //unregister the custom post type 
-            unregister_post_type( 'street' );
+            //unregister the custom post Area 
+            unregister_post_Area( 'street' );
 
             //delete option
             delete_option( 'Activated_Plugin' );
         }
 
-
          /**
-         * Create the custom post type and make sure that the data is refreshed a max of once per minute
+         * Create the custom post Area and make sure that the data is refreshed a max of once per minute
          * 
          */
-        public function create_post_type(){
+        public function create_post_Area(){
             if (  get_option( 'Activated_Plugin' ) == 'activated' ) {
 
-                add_action('init', array( $this, 'streets_setup_post_type'));
+                add_action('init', array( $this, 'streets_setup_post_Area'));
+                add_action('init', array( $this, 'streets_taxonomies'));
             }
             
             // Run_task transient prevents this from running
@@ -86,10 +85,10 @@ if(! class_exists( 'Street_View' )){
         }
 
         /**
-         * Register the "street" custom post type
+         * Register the "street" custom post Area
          * 
          */
-        public function streets_setup_post_type() {
+        public function streets_setup_post_Area() {
             register_post_type('streets',
                 array(
                     'labels'      => array(
@@ -113,6 +112,36 @@ if(! class_exists( 'Street_View' )){
                     ),
                 )
             );
+        }
+
+        public function streets_taxonomies(){
+            $labels = array(
+                'name' => 'Areas',
+                'singular_name' => 'Area',
+                'search_items' => 'Search Areas',
+                'all_items' => 'All Areas',
+                'parent_item' => 'Parent Area',
+                'parent_item_colon' => 'Parent Area:',
+                'edit_item' => 'Edit Area',
+                'update_item' => 'Update Area',
+                'add_new_item' => 'Add New Area',
+                'new_item_name' => 'New Area Name',
+                'menu_name' => 'Areas' 
+            );
+
+            $args = array(
+                'hierarchical' => true,
+                'labels' => $labels,
+                'show_ui' => true,
+                'show_admin_column' => true,
+                'query_var' => true,
+                'rewrite' => array('slug' => 'area')
+
+            );
+
+            register_taxonomy('Area', array('post', 'page', 'streets'), $args);
+
+
         }
 
         /**
@@ -229,7 +258,7 @@ if(! class_exists( 'Street_View' )){
                 $street = array(
                     'post_title'    => wp_strip_all_tags( $streetName ),
                     'post_status'   => 'publish',
-                    'post_type' => 'streets',				
+                    'post_Area' => 'streets',				
                 );
                 
                 //insert the new street into the database
@@ -255,8 +284,8 @@ if(! class_exists( 'Street_View' )){
         public function delete_data_streets(){
             global $wpdb;
             $table_name = $wpdb->prefix.'posts';
-            $post_type = 'streets';
-            $wpdb->delete( $table_name, array( 'post_type' => $post_type ) );
+            $post_Area = 'streets';
+            $wpdb->delete( $table_name, array( 'post_Area' => $post_Area ) );
             
         }
 
